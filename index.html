@@ -28,9 +28,6 @@
         }
 
         .assistant {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
             width: 80px;
             height: 80px;
             background: linear-gradient(135deg, #3390EC 0%, #6CC3F2 100%);
@@ -39,11 +36,57 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 16px rgba(51, 144, 236, 0.4);
-            z-index: 1000;
             animation: pulse 2s infinite;
             cursor: pointer;
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .assistant.center-stage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.5);
+            z-index: 2000;
+            width: 120px;
+            height: 120px;
+            box-shadow: 0 8px 32px rgba(51, 144, 236, 0.6);
+        }
+
+        .assistant.corner {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            transform: translate(0, 0) scale(0.6);
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+        }
+
+        .assistant-wrapper {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .assistant-wrapper.right {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .assistant-wrapper.left {
+            justify-content: flex-start;
+            flex-direction: row;
+        }
+
+        .assistant-wrapper.center {
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
 
@@ -89,39 +132,140 @@
         }
 
         .speech-bubble {
-            position: fixed;
-            bottom: 110px;
-            right: 20px;
             background: #2C2C2E;
             padding: 15px 20px;
             border-radius: 12px;
-            max-width: 300px;
+            max-width: 250px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             border: 1px solid #38383A;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            z-index: 999;
             color: #FFFFFF;
             font-size: 14px;
             line-height: 1.5;
-        }
-
-        .speech-bubble.show {
+            position: relative;
+            flex: 1;
+            min-width: 0;
             opacity: 1;
             transform: translateY(0);
+            transition: all 0.3s ease;
         }
 
         .speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -10px;
-            right: 30px;
+            bottom: 20px;
             width: 0;
             height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .assistant-wrapper.right .speech-bubble::after {
+            right: -10px;
+            border-left: 10px solid #2C2C2E;
+        }
+
+        .assistant-wrapper.left .speech-bubble::after {
+            left: -10px;
+            border-right: 10px solid #2C2C2E;
+        }
+
+        .assistant-wrapper.center .speech-bubble::after {
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -10px;
+            border-top: 10px solid #2C2C2E;
             border-left: 10px solid transparent;
             border-right: 10px solid transparent;
-            border-top: 10px solid #2C2C2E;
+            border-bottom: none;
+        }
+
+        .assistant-wrapper.center {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .assistant-wrapper.center .speech-bubble {
+            max-width: 300px;
+        }
+
+        .assistant-center-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .assistant-center-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .assistant-center-overlay .speech-bubble {
+            max-width: 320px;
+            margin-bottom: 30px;
+            transform: translateY(20px);
+            transition: transform 0.5s ease;
+        }
+
+        .assistant-center-overlay.active .speech-bubble {
+            transform: translateY(0);
+        }
+
+        .screen-content {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .screen-content.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .assistant {
+                width: 60px;
+                height: 60px;
+            }
+
+            .speech-bubble {
+                max-width: 180px;
+                font-size: 12px;
+                padding: 12px 15px;
+            }
+
+            .assistant-wrapper {
+                gap: 10px;
+            }
+
+            .assistant-wrapper.center .speech-bubble {
+                max-width: 250px;
+            }
+
+            .assistant-wrapper.right,
+            .assistant-wrapper.left {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .assistant-wrapper.right .speech-bubble::after,
+            .assistant-wrapper.left .speech-bubble::after {
+                display: none;
+            }
+
+            .assistant-wrapper.right {
+                margin-left: 0 !important;
+                width: 100%;
+            }
         }
 
         .screen {
@@ -501,11 +645,24 @@
                     по каждому модулю системы
                 </p>
                 <button class="start-btn" onclick="startDemo()">Начать демонстрацию</button>
+                <div class="assistant-wrapper center" style="margin-top: 40px; flex-direction: column;">
+                    <div class="speech-bubble" style="margin-bottom: 15px;">
+                        <div>Привет! Нажмите "Начать демонстрацию" для автоматического тура или выберите модуль в меню ниже 👇</div>
+                    </div>
+                    <div class="assistant" onclick="toggleAssistant('intro')">
+                        <img src="./1.png" alt="Ассистент" />
+                        <img src="./2.png" alt="Ассистент" />
+                        <img src="./3.png" alt="Ассистент" />
+                        <img src="./4.png" alt="Ассистент" />
+                        <img src="./5.png" alt="Ассистент" />
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Dashboard Screen -->
         <div class="screen" id="dashboard">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">📊 Дашборд</h1>
                 <p style="font-size: 14px; color: #98989D;">Обзор ваших финансов</p>
@@ -565,10 +722,12 @@
                     <div style="color: #f44336; font-weight: bold;">-1 200 ₽</div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Accounts Screen -->
         <div class="screen" id="accounts">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">💳 Счета</h1>
                 <p style="font-size: 14px; color: #98989D;">Управление вашими счетами</p>
@@ -603,13 +762,15 @@
                 </div>
                 <div style="font-size: 28px; font-weight: bold; color: #3390EC;">25 000 ₽</div>
             </div>
-            <div class="feature-highlight">
+            <div class="feature-highlight" style="margin: 15px;">
                 <strong>✨ Мультивалютность:</strong> Поддержка RUB, USD, EUR, KZT
+            </div>
             </div>
         </div>
 
         <!-- Transactions Screen -->
         <div class="screen" id="transactions">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">📝 Транзакции</h1>
                 <p style="font-size: 14px; color: #98989D;">История всех операций</p>
@@ -656,13 +817,15 @@
                     <div style="color: #2196f3; font-weight: bold;">↔ 5 000 ₽</div>
                 </div>
             </div>
-            <div class="feature-highlight">
+            <div class="feature-highlight" style="margin: 15px;">
                 <strong>🔍 Фильтры:</strong> По типу, дате, категории, счету
+            </div>
             </div>
         </div>
 
         <!-- Categories Screen -->
         <div class="screen" id="categories">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">📂 Категории</h1>
                 <p style="font-size: 14px; color: #98989D;">Организация ваших расходов</p>
@@ -699,13 +862,15 @@
                     <div style="font-size: 12px; color: #98989D; margin-top: 5px;">4 500 ₽</div>
                 </div>
             </div>
-            <div class="feature-highlight">
+            <div class="feature-highlight" style="margin: 15px;">
                 <strong>⭐ Избранные категории:</strong> Быстрый доступ к часто используемым
+            </div>
             </div>
         </div>
 
         <!-- Goals Screen -->
         <div class="screen" id="goals">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">🎯 Цели</h1>
                 <p style="font-size: 14px; color: #98989D;">Достигайте финансовых целей</p>
@@ -742,13 +907,15 @@
                 </div>
                 <p style="font-size: 12px; opacity: 0.9; margin-top: 10px;">Осталось: 30 000 ₽</p>
             </div>
-            <div class="feature-highlight">
+            <div class="feature-highlight" style="margin: 15px;">
                 <strong>🎮 Игровая механика:</strong> Уровни и прогресс для мотивации
+            </div>
             </div>
         </div>
 
         <!-- Reports Screen -->
         <div class="screen" id="reports">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">📊 Отчёты</h1>
                 <p style="font-size: 14px; color: #98989D;">Детальная аналитика</p>
@@ -776,21 +943,85 @@
             </div>
             <div class="card">
                 <h3 style="margin-bottom: 15px; color: #FFFFFF; font-weight: 600;">Топ категорий расходов</h3>
-                <div class="chart-container">
-                    <div style="text-align: center;">
-                        <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
-                        <div style="color: #98989D;">Интерактивные графики</div>
-                        <div style="font-size: 12px; color: #98989D; margin-top: 5px;">Круговые, линейные, столбчатые</div>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: #3390EC; border-radius: 2px;"></div>
+                            <span style="color: #FFFFFF; font-size: 14px;">Продукты</span>
+                        </div>
+                        <div style="flex: 2; height: 24px; background: #3A3A3C; border-radius: 12px; overflow: hidden; position: relative;">
+                            <div style="height: 100%; width: 44%; background: linear-gradient(90deg, #3390EC 0%, #6CC3F2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                <span style="color: #FFFFFF; font-size: 11px; font-weight: 600;">12 500 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: #4CAF50; border-radius: 2px;"></div>
+                            <span style="color: #FFFFFF; font-size: 14px;">Жильё</span>
+                        </div>
+                        <div style="flex: 2; height: 24px; background: #3A3A3C; border-radius: 12px; overflow: hidden; position: relative;">
+                            <div style="height: 100%; width: 53%; background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                <span style="color: #FFFFFF; font-size: 11px; font-weight: 600;">15 000 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: #FF9800; border-radius: 2px;"></div>
+                            <span style="color: #FFFFFF; font-size: 14px;">Рестораны</span>
+                        </div>
+                        <div style="flex: 2; height: 24px; background: #3A3A3C; border-radius: 12px; overflow: hidden; position: relative;">
+                            <div style="height: 100%; width: 29%; background: linear-gradient(90deg, #FF9800 0%, #FFB74D 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                <span style="color: #FFFFFF; font-size: 11px; font-weight: 600;">8 300 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: #9C27B0; border-radius: 2px;"></div>
+                            <span style="color: #FFFFFF; font-size: 14px;">Транспорт</span>
+                        </div>
+                        <div style="flex: 2; height: 24px; background: #3A3A3C; border-radius: 12px; overflow: hidden; position: relative;">
+                            <div style="height: 100%; width: 18%; background: linear-gradient(90deg, #9C27B0 0%, #BA68C8 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                <span style="color: #FFFFFF; font-size: 11px; font-weight: 600;">5 200 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: #F44336; border-radius: 2px;"></div>
+                            <span style="color: #FFFFFF; font-size: 14px;">Развлечения</span>
+                        </div>
+                        <div style="flex: 2; height: 24px; background: #3A3A3C; border-radius: 12px; overflow: hidden; position: relative;">
+                            <div style="height: 100%; width: 16%; background: linear-gradient(90deg, #F44336 0%, #EF5350 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                                <span style="color: #FFFFFF; font-size: 11px; font-weight: 600;">4 500 ₽</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="feature-highlight">
-                <strong>🤖 ИИ-аналитика:</strong> Умные рекомендации и прогнозы
+            <div class="card">
+                <h3 style="margin-bottom: 15px; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <span>🤖</span> ИИ-аналитика
+                </h3>
+                <div style="background: rgba(51, 144, 236, 0.1); border-left: 3px solid #3390EC; padding: 15px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 13px; color: #FFFFFF; line-height: 1.6;">
+                        <strong style="color: #6CC3F2;">💡 Рекомендация:</strong> За последний месяц расходы на рестораны выросли на 15%. Рекомендуем сократить эту категорию до 6 000 ₽ для достижения финансовых целей.
+                    </div>
+                </div>
+                <div style="background: rgba(76, 175, 80, 0.1); border-left: 3px solid #4CAF50; padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 13px; color: #FFFFFF; line-height: 1.6;">
+                        <strong style="color: #8BC34A;">📈 Прогноз:</strong> При текущем темпе накоплений вы достигнете цели "Отпуск на море" через 2 месяца. Продолжайте в том же духе!
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
 
         <!-- Shared Budgets Screen -->
         <div class="screen" id="shared">
+            <div class="screen-content">
             <div class="header">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #FFFFFF;">👥 Совместные бюджеты</h1>
                 <p style="font-size: 14px; color: #98989D;">Управление общими финансами</p>
@@ -815,8 +1046,34 @@
                     </div>
                 </div>
             </div>
-            <div class="feature-highlight">
+            <div class="feature-highlight" style="margin: 15px;">
                 <strong>🔗 Приглашения:</strong> Приглашайте друзей по коду или ссылке
+            </div>
+            </div>
+        </div>
+
+        <!-- Assistant Center Overlay -->
+        <div class="assistant-center-overlay" id="assistantOverlay">
+            <div class="speech-bubble">
+                <div id="speechText">Привет! Я ваш бизнес-ассистент.</div>
+            </div>
+            <div class="assistant center-stage" id="centerAssistant">
+                <img src="./1.png" alt="Ассистент" />
+                <img src="./2.png" alt="Ассистент" />
+                <img src="./3.png" alt="Ассистент" />
+                <img src="./4.png" alt="Ассистент" />
+                <img src="./5.png" alt="Ассистент" />
+            </div>
+        </div>
+
+        <!-- Corner Assistant (visible on all screens) -->
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+            <div class="assistant corner" id="cornerAssistant">
+                <img src="./1.png" alt="Ассистент" />
+                <img src="./2.png" alt="Ассистент" />
+                <img src="./3.png" alt="Ассистент" />
+                <img src="./4.png" alt="Ассистент" />
+                <img src="./5.png" alt="Ассистент" />
             </div>
         </div>
 
@@ -853,17 +1110,6 @@
         </div>
     </div>
 
-    <!-- Assistant -->
-    <div class="assistant" onclick="toggleAssistant()">
-        <img src="./1.png" alt="Ассистент" />
-        <img src="./2.png" alt="Ассистент" />
-        <img src="./3.png" alt="Ассистент" />
-        <img src="./4.png" alt="Ассистент" />
-        <img src="./5.png" alt="Ассистент" />
-    </div>
-    <div class="speech-bubble" id="speechBubble">
-        <div id="speechText">Привет! Я ваш бизнес-ассистент. Нажмите на меня, чтобы начать демонстрацию!</div>
-    </div>
 
     <script>
         let currentScreen = 'intro';
@@ -885,10 +1131,21 @@
             // Hide all screens
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
+                const content = screen.querySelector('.screen-content');
+                if (content) {
+                    content.classList.add('hidden');
+                }
             });
             
             // Show selected screen
-            document.getElementById(screenId).classList.add('active');
+            const screen = document.getElementById(screenId);
+            if (screen) {
+                screen.classList.add('active');
+                const content = screen.querySelector('.screen-content');
+                if (content) {
+                    content.classList.remove('hidden');
+                }
+            }
             currentScreen = screenId;
             
             // Update nav items
@@ -898,67 +1155,167 @@
                     item.classList.add('active');
                 }
             });
-            
-            // Show message
-            showMessage(messages[screenId]);
         }
 
-        function showMessage(text) {
-            const bubble = document.getElementById('speechBubble');
-            const speechText = document.getElementById('speechText');
-            speechText.innerHTML = text;
-            bubble.classList.add('show');
+        function toggleAssistant(screenId) {
+            // Находим ассистента на текущем экране
+            const screen = document.getElementById(screenId || currentScreen);
+            if (!screen) return;
             
-            setTimeout(() => {
-                bubble.classList.remove('show');
-            }, 5000);
-        }
-
-        function toggleAssistant() {
-            const bubble = document.getElementById('speechBubble');
-            if (bubble.classList.contains('show')) {
-                bubble.classList.remove('show');
+            const assistantWrapper = screen.querySelector('.assistant-wrapper');
+            if (!assistantWrapper) return;
+            
+            const speechBubble = assistantWrapper.querySelector('.speech-bubble');
+            if (!speechBubble) return;
+            
+            // Анимация появления/исчезновения
+            if (speechBubble.style.opacity === '1') {
+                speechBubble.style.opacity = '0';
+                speechBubble.style.transform = 'translateY(10px)';
             } else {
-                showMessage(messages[currentScreen]);
+                speechBubble.style.opacity = '1';
+                speechBubble.style.transform = 'translateY(0)';
             }
+        }
+
+        function showAssistantInCenter(message, callback) {
+            const overlay = document.getElementById('assistantOverlay');
+            const centerAssistant = overlay.querySelector('.assistant');
+            const cornerAssistant = document.getElementById('cornerAssistant');
+            const speechBubble = overlay.querySelector('.speech-bubble');
+            const speechText = speechBubble.querySelector('#speechText');
+            
+            speechText.textContent = message;
+            
+            // Скрываем ассистента в углу
+            if (cornerAssistant) {
+                cornerAssistant.style.opacity = '0';
+            }
+            
+            // Показываем ассистента в центре
+            overlay.classList.add('active');
+            centerAssistant.classList.add('center-stage');
+            centerAssistant.classList.remove('corner');
+            
+            // После показа сообщения убираем ассистента в угол
+            setTimeout(() => {
+                centerAssistant.classList.remove('center-stage');
+                centerAssistant.classList.add('corner');
+                
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    // Показываем ассистента в углу снова
+                    if (cornerAssistant) {
+                        cornerAssistant.style.opacity = '1';
+                        cornerAssistant.style.transition = 'opacity 0.5s ease';
+                    }
+                    if (callback) callback();
+                }, 800);
+            }, 3000);
+        }
+
+        function showModuleContent(screenId) {
+            const screen = document.getElementById(screenId);
+            if (!screen) return;
+            
+            const content = screen.querySelector('.screen-content') || screen;
+            content.classList.remove('hidden');
+            
+            // Анимация появления элементов
+            const cards = screen.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
         }
 
         function startDemo() {
             isAutoPlaying = true;
             demoStep = 1;
-            showScreen('dashboard');
-            showMessage(messages.dashboard);
             
-            // Auto-advance through screens
-            const autoAdvance = () => {
-                if (!isAutoPlaying) return;
+            const demoSequence = [
+                {
+                    screen: 'dashboard',
+                    message: 'Добро пожаловать! Это главный экран - Дашборд. Здесь вы видите общий баланс, быстрые действия и последние операции. Всё в одном месте!'
+                },
+                {
+                    screen: 'accounts',
+                    message: 'Модуль Счетов. Вы можете создавать неограниченное количество счетов: карты, наличные, электронные кошельки. Поддержка мультивалютности!'
+                },
+                {
+                    screen: 'transactions',
+                    message: 'История всех транзакций. Мощные фильтры по типу, дате, категории и счету. Легко находите нужные операции!'
+                },
+                {
+                    screen: 'categories',
+                    message: 'Категории помогают организовать ваши расходы. Создавайте свои категории с иконками и цветами. Отмечайте избранные для быстрого доступа!'
+                },
+                {
+                    screen: 'goals',
+                    message: 'Финансовые цели с игровой механикой! Устанавливайте цели, отслеживайте прогресс по уровням. Мотивация достигать большего!'
+                },
+                {
+                    screen: 'reports',
+                    message: 'Детальная аналитика и отчёты. Графики доходов и расходов, топ категорий, сравнение периодов. ИИ-ассистент даёт умные рекомендации и прогнозы!'
+                },
+                {
+                    screen: 'shared',
+                    message: 'Совместные бюджеты для семьи или команды. Создавайте общие бюджеты, приглашайте участников, ведите совместный учёт финансов!'
+                }
+            ];
+            
+            let currentIndex = 0;
+            
+            function playNext() {
+                if (!isAutoPlaying || currentIndex >= demoSequence.length) {
+                    isAutoPlaying = false;
+                    return;
+                }
                 
-                setTimeout(() => {
-                    if (demoStep < screens.length - 1) {
-                        demoStep++;
-                        showScreen(screens[demoStep]);
-                        showMessage(messages[screens[demoStep]]);
-                        autoAdvance();
-                    } else {
-                        // Loop back to dashboard
-                        demoStep = 1;
-                        showScreen('dashboard');
-                        showMessage("Демонстрация завершена! Вы можете свободно переключаться между модулями в меню.");
-                        isAutoPlaying = false;
-                    }
-                }, 6000); // 6 seconds per screen
-            };
+                const step = demoSequence[currentIndex];
+                
+                // Показываем ассистента в центре с сообщением
+                showAssistantInCenter(step.message, () => {
+                    // После того как ассистент ушел в угол, показываем модуль
+                    showScreen(step.screen);
+                    showModuleContent(step.screen);
+                    
+                    // Ждем пока пользователь увидит модуль, затем переходим к следующему
+                    setTimeout(() => {
+                        currentIndex++;
+                        playNext();
+                    }, 4000);
+                });
+            }
             
-            autoAdvance();
+            playNext();
         }
 
-        // Initialize
-        showMessage(messages.intro);
+        // Initialize - показываем ассистента на intro экране
+        setTimeout(() => {
+            const introScreen = document.getElementById('intro');
+            if (introScreen) {
+                const assistantWrapper = introScreen.querySelector('.assistant-wrapper');
+                if (assistantWrapper) {
+                    const speechBubble = assistantWrapper.querySelector('.speech-bubble');
+                    if (speechBubble) {
+                        speechBubble.style.opacity = '1';
+                        speechBubble.style.transform = 'translateY(0)';
+                        speechBubble.style.transition = 'all 0.3s ease';
+                    }
+                }
+            }
+        }, 500);
         
         // Add click handlers to action buttons for demo
         document.querySelectorAll('.action-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                showMessage("Быстрые действия позволяют быстро добавить доход, расход или перевод прямо с главного экрана!");
+                // Можно добавить анимацию при клике
             });
         });
     </script>
